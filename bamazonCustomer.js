@@ -20,9 +20,6 @@ connection.connect(function (err) {
     if (err) throw err;
     console.log("connected as id " + connection.threadId + "\n");
 
-    //Function that displays the content of the products table
-    readProducts();
-
     //Function that displays the first two questions to user and the updates products
     initialize();
 
@@ -39,26 +36,65 @@ function readProducts() {
 
 
 function initialize() {
+    readProducts();
     connection.query("SELECT * FROM products", function (err, res) {
         if (err) throw err;
         inquirer.prompt([
             {
                 name: "id",
-                type: "number",
-                message: "What is the ID of the product that you would like to buy?",
+                type: "input",
+                message: "What is the ID of the item that you would like to purchase? [Quit with Q]",
 
-            }, {
-                name: "quantity",
-                type: "number",
-                message: "How many units would you like to buy?",
             }
         ]).then(function (answers) {
-            //compare item quantity with the current quantity
-            //if item exists, then fullfill the order
-            //if the item does not exist, console.log ("Insufficient quantity")
-            //Show customer the total purchase price
+            var product = answers.id;
+            var query = "SELECT * FROM products WHERE item_id=" + product + "";
 
+            if (product === "Q") {
+                console.log("Goodbye");
+                connection.end();
+                return;
 
+            } else {
+                connection.query(query, function (err, res) {
+                    if (err) throw err;
+                    if (res.length < 1) {
+                        console.log("That item is not in inventory");
+                        initialize();
+                    }
+                    else {
+                        inquirer.prompt([
+                            {
+                                name: "quantity",
+                                type: "input",
+                                message: "What quantity would you like to purchase? [Quit with Q]",
+
+                            }
+                        ]).then(function (answers) {
+                            var quantity = answers.quantity;
+                            if (quantity === "Q") {
+                                console.log("Goodbye");
+                                connection.end();
+                                return;
+                            }
+                            if (quantity < res[0].quantity) {
+                                console.log("Insufficient quantity!")
+                            }
+                            else {
+                                console.log("Successfully purchased " + product + quantity);
+                                console.log("Your total price is: " + (quantity * res[0].price))
+                                //Need to update table with the new inventory
+                            }
+                        })
+
+                    }
+                })
+
+            }
         })
     })
-}
+
+};
+
+
+
