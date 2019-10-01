@@ -59,7 +59,7 @@ function initialize() {
                 connection.query(query, function (err, res) {
                     if (err) throw err;
                     if (res.length < 1) {
-                        console.log("That item is not in inventory");
+                        console.log("That item is not in the inventory");
                         initialize();
                     }
                     else {
@@ -67,7 +67,7 @@ function initialize() {
                             {
                                 name: "quantity",
                                 type: "input",
-                                message: "What quantity would you like to purchase? [Quit with Q]",
+                                message: "How many would you like? [Quit with Q]",
 
                             }
                         ]).then(function (answers) {
@@ -77,14 +77,31 @@ function initialize() {
                                 connection.end();
                                 return;
                             }
-                            if (quantity < res[0].quantity) {
-                                console.log("Insufficient quantity!")
-                            }
-                            else {
-                                console.log("Successfully purchased " + product + quantity);
-                                console.log("Your total price is: " + (quantity * res[0].price))
+                            
+                            else if (quantity <= res[0].stock_quantity)   {
+                                console.log("Successfully purchased " + quantity + " " + res[0].product_name + "(s)");
+                                console.log("Your total price is: " + (quantity * res[0].price) + " dollars")
                                 //Need to update table with the new inventory
+                                newQuantity = res[0].stock_quantity - quantity;
+                                connection.query("UPDATE products SET ? WHERE ?",
+                                [
+                                  {
+                                    stock_quantity: newQuantity
+                                  },
+                                  {
+                                    item_id: product
+                                  }
+                                ], function (err, res) {
+                                    if (err) throw err;
+                                    initialize();
+                                })
+ 
                             }
+                            else if (quantity >= res[0].stock_quantity) {
+                                console.log("Insufficient quantity!");
+                                initialize();
+                            }
+                              
                         })
 
                     }
