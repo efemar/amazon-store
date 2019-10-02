@@ -19,13 +19,11 @@ var connection = mysql.createConnection({
 connection.connect(function (err) {
     if (err) throw err;
     console.log("connected as id " + connection.threadId + "\n");
-
-    //Function that displays the first two questions to user and the updates products
     initialize();
 
 });
 
-
+//function that displays the database items
 function readProducts() {
     connection.query("SELECT * FROM products", function (err, res) {
         if (err) throw err;
@@ -34,7 +32,7 @@ function readProducts() {
 }
 
 
-
+//function that prompts the user to answer which item they want
 function initialize() {
     readProducts();
     connection.query("SELECT * FROM products", function (err, res) {
@@ -59,12 +57,7 @@ function initialize() {
 };
 
 
-function quit() {
-    console.log("Goodbye");
-    connection.end();
-}
-
-
+//function that prompts user to input quantity
 function promptUserQuantity(product) { 
 var query = "SELECT * FROM products WHERE item_id=" + product + "";
 connection.query(query, function (err, res) {
@@ -82,32 +75,16 @@ connection.query(query, function (err, res) {
 
             }
         ]).then(function (answers) {
-            var quantity = answers.quantity;
-            if (quantity === "Q") {
+            if (answers.quantity === "Q") {
                 quit();
                 return;
             }
 
-            else if (quantity <= res[0].stock_quantity) {
-                console.log("Successfully purchased " + quantity + " " + res[0].product_name + "(s)");
-                console.log("Your total price is: " + (quantity * res[0].price) + " dollars")
-                //Need to update table with the new inventory
-                newQuantity = res[0].stock_quantity - quantity;
-                connection.query("UPDATE products SET ? WHERE ?",
-                    [
-                        {
-                            stock_quantity: newQuantity
-                        },
-                        {
-                            item_id: product
-                        }
-                    ], function (err, res) {
-                        if (err) throw err;
-                        initialize();
-                    })
+            else if (answers.quantity <= res[0].stock_quantity) {
+                updateInventory(answers.quantity, product, res);
 
             }
-            else if (quantity >= res[0].stock_quantity) {
+            else if (answers.quantity >= res[0].stock_quantity) {
                 console.log("Insufficient quantity!");
                 initialize();
             }
@@ -117,4 +94,32 @@ connection.query(query, function (err, res) {
     }
 })
 
+}
+
+//function to update the inventory based on quantity selected
+function updateInventory(quantity, product, res) {
+    console.log("Successfully purchased " + quantity + " " + res[0].product_name + "(s)");
+    console.log("Your total price is: " + (quantity * res[0].price) + " dollars")
+    //Need to update table with the new inventory
+    newQuantity = res[0].stock_quantity - quantity;
+    //console.log(newQuantity);
+    //console.log(answers.id);
+    connection.query("UPDATE products SET ? WHERE ?",
+        [
+            {
+                stock_quantity: newQuantity
+            },
+            {
+                item_id: product
+            }
+        ], function (err, res) {
+            if (err) throw err;
+            initialize();
+        })
+}
+
+//Function that runs after use inputs "Q"
+function quit() {
+    console.log("Goodbye");
+    connection.end();
 }
