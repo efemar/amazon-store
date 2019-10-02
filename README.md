@@ -26,10 +26,10 @@ node 'bamazonCustomer.js
 <img src="images/screenshot-node.png">
 
 ## Link to the video of how it works:
-https://drive.google.com/open?id=1jstWdpcLCpBzXGhFQIZGQiyFTftqyCHS
+<a href="https://drive.google.com/open?id=1jstWdpcLCpBzXGhFQIZGQiyFTftqyCHS">https://drive.google.com/open?id=1jstWdpcLCpBzXGhFQIZGQiyFTftqyCHS</a>
 
 ## Link to the deployed version of the app
-https://efemar.github.io/amazon-store/
+<a href="https://efemar.github.io/amazon-store/">https://efemar.github.io/amazon-store/</a>
 
 ## Technologies used in the App
 This app was built using javascript and node.js. It requires that the use have internet access, terminal and mysql.
