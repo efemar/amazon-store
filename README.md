@@ -19,7 +19,7 @@ Via the command lines, the app is able to receive user's input of product id and
 2) Install inquirer and mysql using npm packages
 3) Command line to type:
 
-node 'bamazonCustomer.js 
+node bamazonCustomer.js 
 
 4) The following screen will appear:
 
